@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ourochest Master</title>
+    <title>Ourochest Master V16</title>
     <style>
         :root {
             --bg: #0b0d12;
@@ -12,10 +12,10 @@
             --text-main: #eceff4;
             --text-dim: #94a3b8;
             
-            /* Colores */
+            /* COLORES CORREGIDOS */
             --blue: #4f76cc;      
-            --green: #48bfa6;     
-            --turquoise: #2dc4d9; 
+            --green: #2ecc71;     /* VERDE NUEVO (Más vibrante y distinto) */
+            --turquoise: #2dc4d9; /* TURQUESA (Cian) */
             --yellow: #eeb846;    
             --orange: #f0833a;    
             --red: #e04f5f;       
@@ -39,7 +39,7 @@
             overflow: hidden;
         }
 
-        /* HEADER RESPONSIVO (TUS CAMBIOS) */
+        /* HEADER RESPONSIVO */
         header {
             background-color: var(--panel);
             border-bottom: 1px solid var(--border);
@@ -68,7 +68,7 @@
 
         select { background: #111; color: white; border: 1px solid #333; padding: 5px; border-radius: 4px; font-size: 0.85rem;}
 
-        /* MEDIA QUERY: MÓVIL (TUS CAMBIOS) */
+        /* MEDIA QUERY: MÓVIL */
         @media (max-width: 768px) {
             header {
                 height: auto;
@@ -134,10 +134,10 @@
         
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; border: 2px solid var(--red) !important; }
 
-        /* COLORES */
+        /* COLORES & FONDOS (Actualizados para el nuevo verde) */
         .cell.revealed { cursor: default; transform: none; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .cell.blue { border: 2px solid var(--blue); color: var(--blue); background: rgba(79, 118, 204, 0.15); }
-        .cell.green { border: 2px solid var(--green); color: var(--green); background: rgba(72, 191, 166, 0.15); }
+        .cell.green { border: 2px solid var(--green); color: var(--green); background: rgba(46, 204, 113, 0.15); } /* Nuevo fondo verde */
         .cell.turquoise { border: 2px solid var(--turquoise); color: var(--turquoise); background: rgba(45, 196, 217, 0.15); }
         .cell.yellow { border: 2px solid var(--yellow); color: var(--yellow); background: rgba(238, 184, 70, 0.15); }
         .cell.orange { border: 2px solid var(--orange); color: var(--orange); background: rgba(240, 131, 58, 0.15); }
@@ -158,7 +158,7 @@
         .hint-text { font-size: 0.85em; opacity: 0.9; display: block; margin-top: 4px; color: #ddd; }
         
         .le-blue { border-color: var(--blue); background: rgba(79, 118, 204, 0.15); }
-        .le-green { border-color: var(--green); background: rgba(72, 191, 166, 0.15); }
+        .le-green { border-color: var(--green); background: rgba(46, 204, 113, 0.15); } /* Nuevo fondo verde */
         .le-turq { border-color: var(--turquoise); background: rgba(45, 196, 217, 0.15); }
         .le-yell { border-color: var(--yellow); background: rgba(238, 184, 70, 0.15); }
         .le-orng { border-color: var(--orange); background: rgba(240, 131, 58, 0.15); }
@@ -169,7 +169,7 @@
             text-align: center; padding: 15px; color: white; margin-top: 10px;
         }
 
-        /* ESTILOS DE LA GUÍA (Necesarios para que se vea bien) */
+        /* ESTILOS DE LA GUÍA */
         .guide-container { max-width: 900px; width: 100%; margin: 0 auto; padding-bottom: 50px; }
         .guide-section { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
         .section-header { font-size: 1.2rem; color: var(--gold); font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
