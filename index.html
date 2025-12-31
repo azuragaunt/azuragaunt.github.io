@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ourochest Master V13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ourochest Master</title>
     <style>
         :root {
             --bg: #0b0d12;
@@ -39,20 +39,21 @@
             overflow: hidden;
         }
 
-        /* HEADER */
+        /* HEADER RESPONSIVO */
         header {
             background-color: var(--panel);
             border-bottom: 1px solid var(--border);
-            height: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
             flex-shrink: 0;
             z-index: 10;
+            height: 60px;
+            transition: all 0.3s ease;
         }
 
-        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; }
+        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
         .logo span { color: white; margin-left: 5px; font-weight: 400; opacity: 0.9; }
 
         .controls { display: flex; gap: 10px; align-items: center; }
@@ -60,11 +61,35 @@
         .nav-btn {
             background: transparent; color: var(--text-dim); border: 1px solid transparent;
             padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: 600; font-size: 0.9rem;
+            white-space: nowrap;
         }
         .nav-btn:hover { color: white; }
         .nav-btn.active { background: #222; color: var(--gold); border-color: var(--border); }
 
         select { background: #111; color: white; border: 1px solid #333; padding: 5px; border-radius: 4px; font-size: 0.85rem;}
+
+        /* MEDIA QUERY: MÓVIL */
+        @media (max-width: 768px) {
+            header {
+                height: auto;
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+            }
+            .controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .nav-btn {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+                flex: 1 1 auto; /* Botones flexibles */
+                text-align: center;
+            }
+            /* Ocultar selector de idioma en móvil para ahorrar espacio (se autodetecta) o hacerlo pequeño */
+            select { max-width: 80px; }
+        }
 
         /* MAIN */
         #main-container {
@@ -84,7 +109,18 @@
             grid-template-columns: 20px repeat(5, 50px);
             grid-template-rows: 20px repeat(5, 50px);
             gap: 4px; margin-bottom: 15px;
+            justify-content: center; /* Centrar grid */
         }
+        
+        @media (max-width: 400px) {
+            /* Grid más pequeño para móviles muy estrechos */
+            .grid-wrapper {
+                grid-template-columns: 15px repeat(5, 40px);
+                grid-template-rows: 15px repeat(5, 40px);
+            }
+            .cell { width: 40px; height: 40px; font-size: 1rem; }
+        }
+
         .coord-header { display: flex; justify-content: center; align-items: center; font-size: 0.8rem; color: var(--text-dim); font-weight: bold; }
         .cell {
             width: 50px; height: 50px; background-color: var(--cell-bg); border-radius: 6px; cursor: pointer;
@@ -135,13 +171,13 @@
         .guide-section { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 30px; }
         .section-header { font-size: 1.4rem; color: var(--gold); font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
-        .flow-step { display: flex; gap: 20px; margin-bottom: 25px; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+        .flow-step { display: flex; gap: 20px; margin-bottom: 25px; border-bottom: 1px dashed #333; padding-bottom: 20px; flex-wrap: wrap;}
         .flow-step:last-child { border-bottom: none; }
         
         .mini-grid { display: grid; grid-template-columns: repeat(5, 25px); grid-template-rows: repeat(5, 25px); gap: 2px; background: #000; padding: 5px; border-radius: 4px; flex-shrink: 0; }
         .mg-cell { width: 25px; height: 25px; background: #222; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border-radius: 2px; color: #555; }
         
-        .flow-text { flex: 1; line-height: 1.6; color: var(--text-dim); }
+        .flow-text { flex: 1; line-height: 1.6; color: var(--text-dim); min-width: 250px; }
         .flow-text strong { color: white; }
         .logic-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.8rem; margin-right: 5px; color:black;}
         .lb-blue { background: var(--blue); } .lb-green { background: var(--green); } .lb-yell { background: var(--yellow); }
@@ -160,7 +196,7 @@
         .mg-turq { background: var(--turquoise); color: transparent; }
 
         /* PANELES */
-        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; flex: 1; min-width: 350px; display: flex; flex-direction: column; align-items: center; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; flex: 1; min-width: 300px; max-width: 100%; display: flex; flex-direction: column; align-items: center; }
         .dual-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         
         .btn-reset { width: 100%; padding: 12px; margin-top: 10px; background: var(--blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
@@ -184,13 +220,13 @@
 <body>
 
     <header>
-        <div class="logo">OUROCHEST<span>MASTER</span></div>
+        <div class="logo"><span>OUROCHEST</span>MASTER</div>
         <div class="controls">
-            <button class="nav-btn active" onclick="setView('practice')" data-key="nav_practice">Práctica</button>
-            <button class="nav-btn" onclick="setView('solver')" data-key="nav_solver">Solver</button>
-            <button class="nav-btn" onclick="setView('dual')" data-key="nav_dual">Dual</button>
-            <button class="nav-btn" onclick="setView('guide')" data-key="nav_guide">Guía</button>
-            <select id="langSelect" onchange="changeLanguage(this.value)">
+            <button class="nav-btn active" onclick="navigate('practice')" data-key="nav_practice">Práctica</button>
+            <button class="nav-btn" onclick="navigate('solver')" data-key="nav_solver">Solver</button>
+            <button class="nav-btn" onclick="navigate('dual')" data-key="nav_dual">Dual</button>
+            <button class="nav-btn" onclick="navigate('guide')" data-key="nav_guide">Guía</button>
+            <select id="langSelect" onchange="manualLangChange(this.value)">
                 <option value="es">Español</option>
                 <option value="en">English</option>
             </select>
@@ -201,7 +237,7 @@
         
         <!-- VISTA PRÁCTICA -->
         <div id="view-practice" class="view-section active">
-            <div class="panel" style="max-width: 500px; margin: 0 auto;">
+            <div class="panel">
                 <h2 style="width:100%; display:flex; justify-content:space-between; color:white; margin-bottom:10px;">
                     <span data-key="practice_title">Práctica</span> 
                     <span id="p-score" style="color:var(--gold)">0 pts</span>
@@ -217,7 +253,7 @@
 
         <!-- VISTA SOLVER -->
         <div id="view-solver" class="view-section">
-            <div class="panel" style="max-width: 500px; margin: 0 auto;">
+            <div class="panel">
                 <h2 style="width:100%; display:flex; justify-content:space-between; color:white; margin-bottom:10px;">
                     Solver <span id="s-status" style="font-size:0.8rem; opacity:0.7">24 Possible</span>
                 </h2>
@@ -410,7 +446,8 @@
                         <div class="mg-cell"></div><div class="mg-cell"></div><div class="mg-cell"></div><div class="mg-cell"></div><div class="mg-cell"></div>
                     </div>
                     <div class="flow-text">
-                        <p>Always start at <strong>(3,3)</strong>. It reveals info about rows, columns, and diagonals instantly.</p>
+                        <p>Your first click is <strong>ALWAYS</strong> the center <strong>(3,3)</strong>.<br>
+                        Since Red is never there, this click reveals info about 4 axes at once.</p>
                     </div>
                 </div>
             </div>
@@ -540,19 +577,73 @@
         };
 
         let curLang = 'es';
+        let currentView = 'practice';
 
-        function changeLanguage(lang) {
-            curLang = translations[lang] ? lang : 'es';
+        // DETECCIÓN AUTOMÁTICA DE IDIOMA
+        function autoDetectLanguage() {
+            const userLang = navigator.language || navigator.userLanguage; 
+            return userLang.startsWith('es') ? 'es' : 'en';
+        }
+
+        function setLanguage(lang) {
+            curLang = lang;
+            document.getElementById('langSelect').value = lang;
+            
             const t = translations[curLang];
-
             document.querySelectorAll('[data-key]').forEach(el => {
                 const key = el.getAttribute('data-key');
                 if(t[key]) el.innerText = t[key];
             });
-
             document.getElementById('guide-content').innerHTML = guideContent[curLang];
-            renderLog(); 
+            renderLog();
         }
+
+        // ENRUTAMIENTO (HASH ROUTING)
+        function updateURL() {
+            window.location.hash = `${curLang}/${currentView}`;
+        }
+
+        function readURL() {
+            const hash = window.location.hash.substring(1); // remove #
+            if (!hash) {
+                // Primer acceso: Autodetectar
+                const detected = autoDetectLanguage();
+                setLanguage(detected);
+                navigate('practice'); // Default view
+                return;
+            }
+
+            const parts = hash.split('/');
+            if (parts.length === 2) {
+                const lang = parts[0];
+                const view = parts[1];
+                if (translations[lang]) setLanguage(lang);
+                if (['practice','solver','dual','guide'].includes(view)) navigate(view, false);
+            }
+        }
+
+        function navigate(viewName, updateHistory = true) {
+            currentView = viewName;
+            document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
+            document.getElementById('view-'+viewName).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.nav-btn[onclick*="'${viewName}'"]`).classList.add('active');
+
+            if(viewName==='practice' || viewName==='dual') {
+                if(pState.clicks===0 && pState.history.length===0) resetPractice();
+            }
+            if (updateHistory) updateURL();
+        }
+
+        function manualLangChange(val) {
+            setLanguage(val);
+            updateURL();
+        }
+
+        // Event Listeners
+        window.addEventListener('hashchange', readURL);
+        window.addEventListener('load', readURL);
 
         // ============================================
         // 2. GRID & LOGIC
@@ -777,18 +868,7 @@
             });
         }
 
-        function setView(v) {
-            document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
-            document.getElementById('view-'+v).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.nav-btn[onclick*="'${v}'"]`).classList.add('active');
-            
-            if(v==='practice' || v==='dual') {
-                if(pState.clicks===0 && pState.history.length===0) resetPractice();
-            }
-        }
-
-        changeLanguage('es');
+        // Init
         resetPractice();
         resetSolver();
 
