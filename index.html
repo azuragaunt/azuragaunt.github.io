@@ -1,607 +1,640 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ourochest Master V31</title>
+    <title>OuroTools</title>
     <style>
-        :root {
-            --bg: #050508;
-            --panel: #11131a;
-            --border: #2a2e3f;
-            --text-main: #eceff4;
-            --text-dim: #94a3b8;
+        :root { 
+            --bg: #050508; --panel: #0f1115; --border: #232732;
+            --text-main: #eceff4; --text-dim: #94a3b8;
+            --blue: #3b82f6; --green: #2ecc71; --turq: #00e5ff; 
+            --yellow: #f1c40f; --orange: #e67e22; --red: #ff3b30;       
+            --purple: #a855f7; --gold: #ffd700;
             
-            /* PALETA */
-            --blue: #3b82f6;      
-            --green: #2ecc71;     
-            --turquoise: #00e5ff; 
-            --yellow: #f1c40f;    
-            --orange: #e67e22;    
-            --red: #ff3b30;       
-            
-            --cell-bg: #161920;
-            --gold: #ffd700;
-            --suggest: #d900ff; 
+            --current-accent: var(--red); 
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background-color: var(--bg); color: var(--text-main);
+            margin: 0; height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden;
+            /* Centrado para PC */
+            justify-content: center; align-items: center;
+        }
+
+        /* --- APP SHELL (Estructura Principal) --- */
+        #app-shell {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
             background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- LAYOUT ESPECÍFICO PARA ESCRITORIO --- */
+        @media (min-width: 800px) {
+            body {
+                background-color: #020203; /* Fondo más oscuro fuera de la app */
+                background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+            }
+
+            #app-shell {
+                width: 100%; max-width: 900px;
+                height: auto; max-height: 90vh;
+                background-color: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                overflow: hidden;
+            }
+
+            /* Layout Horizontal en PC */
+            #main-layout {
+                display: flex; 
+                flex-direction: row; 
+                flex: 1;
+                overflow: hidden;
+            }
+
+            #game-container {
+                flex: 1.2 !important; /* El grid toma más espacio */
+                border-right: 1px solid var(--border);
+            }
+
+            .controls-panel {
+                flex: 0.8 !important; /* Panel lateral */
+                border-top: none !important;
+                overflow-y: auto;
+            }
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--panel); border-bottom: 1px solid var(--border);
+            padding: 0 15px; flex: 0 0 auto; z-index: 50;
+        }
+        .top-bar { height: 50px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; }
+        #logo-accent { color: var(--current-accent); transition: color 0.3s; }
+
+        .turn-box { 
+            background: #181b24; padding: 4px 12px; border-radius: 6px; 
+            font-family: monospace; font-size: 0.9rem; color: var(--text-dim); 
+            border: 1px solid var(--border);
+        }
+
+        /* TABS */
+        .tabs { display: flex; gap: 0; }
+        .tab {
+            flex: 1; padding: 12px 0; text-align: center; cursor: pointer;
+            font-weight: 700; font-size: 0.85rem; color: var(--text-dim);
+            border-bottom: 2px solid transparent; transition: all 0.2s;
+            opacity: 0.7;
+        }
+        .tab.active { 
+            color: #fff; opacity: 1; 
+            background: linear-gradient(to top, rgba(255,255,255,0.03), transparent);
+            border-bottom-color: var(--current-accent);
+        }
+
+        /* MAIN LAYOUT CONTAINER (Wrapper for Grid + Controls) */
+        #main-layout {
+            flex: 1 1 auto;
+            display: flex; 
+            flex-direction: column; /* Mobile Default */
             overflow: hidden;
         }
 
-        header {
-            background-color: var(--panel);
-            border-bottom: 1px solid var(--border);
-            height: 50px; /* Header más compacto */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            flex-shrink: 0;
-            z-index: 100;
+        /* GRID SYSTEM */
+        #game-container {
+            flex: 1 1 auto; overflow-y: hidden; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative;
         }
-
-        .logo { font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; color: #fff; text-transform: uppercase; }
-        .logo span { color: var(--gold); }
-
-        .controls { display: flex; gap: 10px; align-items: center; }
-
-        select { 
-            background: #1a1e29; color: white; border: 1px solid var(--border); 
-            padding: 4px 15px 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
-        }
-
-        #main-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alineado arriba para no centrar verticalmente en pantallas grandes */
-        }
-
-        .dual-container { 
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px; 
-            width: 100%; 
-            max-width: 1000px; /* Limite total para que no se separen mucho */
-        }
-
-        .panel { 
-            background: var(--panel); border: 1px solid var(--border); border-radius: 12px; 
-            padding: 15px; display: flex; flex-direction: column; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            flex: 1;
-            min-width: 320px; /* Ancho mínimo para móvil */
-            max-width: 450px; /* Ancho máximo para PC (Grid controlado) */
-        }
-
-        h2 { 
-            width: 100%; display: flex; justify-content: space-between; align-items: center;
-            margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 2px solid var(--border);
-            color: white; font-size: 1rem; 
-        }
-
-        /* GRID COMPACTO Y PERFECTO */
-        .grid-container-wrapper {
-            width: 100%;
-            max-width: 340px; /* TAMAÑO CONTROLADO EN PC */
-            margin: 0 auto 15px auto;
-        }
-
-        .master-grid {
-            display: grid;
-            grid-template-columns: 20px repeat(5, 1fr);
-            gap: 4px;
-            width: 100%;
-            /* Aspect ratio cuadrado perfecto contando headers */
-            aspect-ratio: 5.5 / 5.5; 
-        }
-
-        .coord-header { 
-            display: flex; justify-content: center; align-items: center; 
-            font-size: 0.8rem; color: var(--text-dim); font-weight: bold;
+        
+        .grid {
+            display: grid; 
+            grid-template-columns: repeat(5, minmax(0, 1fr)); 
+            grid-template-rows: repeat(5, minmax(0, 1fr));
+            gap: 6px; 
+            width: 100%; max-width: 380px; aspect-ratio: 1;
+            padding: 8px; background: #13161c;
+            border: 1px solid var(--border); border-radius: 16px; flex-shrink: 0;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
         .cell {
-            width: 100%; height: 100%;
-            background-color: var(--cell-bg);
-            border: 1px solid #333a4d; border-radius: 4px;
+            background: #1e222b; 
+            border-radius: 8px; 
+            border: 1px solid #2a303c;
             cursor: pointer; display: flex; justify-content: center; align-items: center;
-            font-size: 1.1rem; /* Texto más discreto */
-            font-weight: bold;
-            position: relative; transition: transform 0.1s; touch-action: manipulation;
+            font-weight: 900; position: relative; 
+            transition: transform 0.1s;
+            overflow: hidden; 
+            font-size: clamp(1rem, 5vw, 1.5rem); 
+            color: rgba(255,255,255,0.8);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
-        .cell:active { transform: scale(0.95); }
-
-        .cell.revealed { cursor: default; transform: none; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); border-color: transparent; }
+        .cell:active { transform: scale(0.92); }
+        .cell.filled { border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
         
-        /* Colores */
-        .cell.blue, .cell.input-blue { border-color: var(--blue) !important; color: var(--blue); background: rgba(59, 130, 246, 0.15) !important; }
-        .cell.green, .cell.input-green { border-color: var(--green) !important; color: var(--green); background: rgba(46, 204, 113, 0.15) !important; }
-        .cell.turquoise, .cell.input-turquoise { border-color: var(--turquoise) !important; color: var(--turquoise); background: rgba(0, 229, 255, 0.15) !important; }
-        .cell.yellow, .cell.input-yellow { border-color: var(--yellow) !important; color: var(--yellow); background: rgba(241, 196, 15, 0.15) !important; }
-        .cell.orange, .cell.input-orange { border-color: var(--orange) !important; color: var(--orange); background: rgba(230, 126, 34, 0.15) !important; }
-        .cell.red, .cell.input-red { background: var(--red) !important; box-shadow: 0 0 15px var(--red); border: 2px solid white !important; color: white !important; }
+        .cell.blue { background: rgba(59, 130, 246, 0.2); color: var(--blue); border-color: var(--blue); }
+        .cell.green { background: rgba(46, 204, 113, 0.2); color: var(--green); border-color: var(--green); }
+        .cell.turquoise { background: rgba(0, 229, 255, 0.2); color: var(--turq); border-color: var(--turq); }
+        .cell.yellow { background: rgba(241, 196, 15, 0.2); color: var(--yellow); border-color: var(--yellow); }
+        .cell.orange { background: rgba(230, 126, 34, 0.2); color: var(--orange); border-color: var(--orange); }
+        .cell.red { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+        .cell.purple { background: var(--purple); color: white; border-color: var(--purple); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
 
-        .cell.eliminated { background: #080a0f; opacity: 0.3; cursor: not-allowed; border-color: #222; }
+        /* SUGGESTIONS */
+        .suggestion { z-index: 5; }
+        .suggestion::after { content: ''; position: absolute; inset: 0; border-radius: 8px; animation: pulse-border 1.5s infinite; }
+        .sugg-chest::after { border: 2px solid #fff; opacity: 0.8; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .sugg-safe::after { border: 2px dashed var(--blue); opacity: 0.8; }
+        .sugg-high-value { box-shadow: 0 0 15px rgba(255,215,0,0.2); border: 2px solid var(--gold) !important; background: rgba(255,215,0,0.05); }
+        .sugg-finisher { border: 3px solid var(--red) !important; box-shadow: 0 0 25px rgba(255,59,48,0.4); animation: pulse-fast 0.5s infinite alternate; }
+
+        @keyframes pulse-border { 0% { opacity: 1; transform: scale(0.95); } 100% { opacity: 0; transform: scale(1.1); } }
+        @keyframes pulse-fast { from { transform: scale(0.98); } to { transform: scale(1.02); } }
+
+        /* CONTROLS */
+        .controls-panel {
+            background: var(--panel); border-top: 1px solid var(--border);
+            padding: 20px; width: 100%; flex: 0 0 auto;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .status-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; font-size: 0.9rem; font-weight: 700; color: var(--text-dim);
+            background: #181b24; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);
+        }
+        .highlight { color: #fff; letter-spacing: 0.5px; }
+
+        .palette { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 15px; }
         
-        /* SUGERENCIA (IA) */
-        .cell.suggestion {
-            border: 2px solid var(--suggest) !important;
-            box-shadow: 0 0 10px var(--suggest), inset 0 0 10px rgba(217, 0, 255, 0.2);
-            animation: pulse-suggest 1s infinite alternate;
-            z-index: 10;
+        .p-btn {
+            height: 52px; border: 1px solid; border-radius: 8px;
+            background: #15171e; font-weight: 800; font-size: 0.75rem;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.15s;
         }
+        .p-btn span { font-size: 0.55rem; opacity: 0.7; margin-top: 2px; font-weight: 600; }
+        .p-btn:hover { background: #20232b; } /* Hover effect for Desktop */
+
+        /* BUTTON COLORS (Always Visible) */
+        .pb-blue { color: var(--blue); border-color: rgba(59,130,246,0.4); }
+        .pb-blue.active { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 0 12px rgba(59,130,246,0.5); }
+        .pb-green { color: var(--green); border-color: rgba(46,204,113,0.4); }
+        .pb-green.active { background: var(--green); color: #fff; border-color: var(--green); box-shadow: 0 0 12px rgba(46,204,113,0.5); }
+        .pb-turq { color: var(--turq); border-color: rgba(0,229,255,0.4); }
+        .pb-turq.active { background: var(--turq); color: #000; border-color: var(--turq); box-shadow: 0 0 12px rgba(0,229,255,0.5); }
+        .pb-yellow { color: var(--yellow); border-color: rgba(241,196,15,0.4); }
+        .pb-yellow.active { background: var(--yellow); color: #000; border-color: var(--yellow); box-shadow: 0 0 12px rgba(241,196,15,0.5); }
+        .pb-orange { color: var(--orange); border-color: rgba(230,126,34,0.4); }
+        .pb-orange.active { background: var(--orange); color: #fff; border-color: var(--orange); box-shadow: 0 0 12px rgba(230,126,34,0.5); }
+        .pb-red { color: var(--red); border-color: rgba(255,59,48,0.4); }
+        .pb-red.active { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 12px rgba(255,59,48,0.5); }
+        .pb-purple { color: var(--purple); border-color: rgba(168,85,247,0.4); }
+        .pb-purple.active { background: var(--purple); color: #fff; border-color: var(--purple); box-shadow: 0 0 12px rgba(168,85,247,0.5); }
+
+        .p-btn:active { transform: translateY(2px); }
+
+        .actions { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-act { 
+            flex: 1; padding: 15px; background: #232732; 
+            border: 1px solid #333; color: #ccc; border-radius: 8px; 
+            font-weight: 700; cursor: pointer; transition: background 0.2s; 
+        }
+        .btn-act:hover { background: #2f3442; }
+        .btn-act:active { background: #1a1d25; }
+        .btn-reset { background: rgba(255, 59, 48, 0.1); color: var(--red); border-color: rgba(255, 59, 48, 0.2); }
+        .btn-reset:hover { background: rgba(255, 59, 48, 0.2); }
         
-        /* CANDIDATO A ROJA (MEJORADO) */
-        .cell.red-candidate {
-            /* Ya no es borde feo, es un glow rojo interno sutil */
-            box-shadow: inset 0 0 0 2px rgba(255, 59, 48, 0.6);
-            background: rgba(255, 59, 48, 0.05);
+        .score-box { 
+            position: absolute; bottom: 30px; left: 0; right: 0; 
+            text-align: center; pointer-events: none;
+            font-size: 2.2rem; font-weight: 900; 
+            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            opacity: 0; transform: translateY(15px); transition: all 0.3s;
         }
+        .score-box.visible { opacity: 1; transform: translateY(0); }
 
-        @keyframes pulse-suggest {
-            from { opacity: 0.8; }
-            to { opacity: 1; transform: scale(1.02); }
+        .disclaimer {
+            font-size: 0.65rem; color: var(--text-dim); text-align: center;
+            border-top: 1px solid var(--border); padding-top: 15px;
+            font-family: monospace; letter-spacing: -0.2px; opacity: 0.6;
         }
-
-        .solver-palette { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; width: 100%; margin-bottom: 15px; }
-        .p-btn { padding: 8px 2px; border: 1px solid #333; cursor: pointer; color: white; font-size: 0.75rem; font-weight: bold; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; }
-        .p-btn:hover { background: #222; }
-        .p-btn.active { border-color: white; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-
-        .err-msg { color: var(--red); font-weight: bold; margin-bottom: 5px; height: 15px; text-align: center; font-size: 0.9rem; opacity: 0; }
-        
-        .log-box { flex: 1; min-height: 120px; background: #0e1016; border: 1px solid #333; border-radius: 8px; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
-        .log-entry { display: grid; grid-template-columns: 25px 1fr auto; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; border-left: 3px solid #555; font-size: 0.85rem; animation: slideIn 0.2s; background: #1a1d26; }
-        .log-desc strong { color: #fff; font-weight: 800; text-transform: uppercase; }
-        .hint-text { display: block; font-size: 0.85em; opacity: 0.8; margin-top: 2px; color: #ccc; }
-
-        /* Colores de Borde Log */
-        .le-blue { border-color: var(--blue); } 
-        .le-green { border-color: var(--green); } 
-        .le-turq { border-color: var(--turquoise); } 
-        .le-yell { border-color: var(--yellow); } 
-        .le-orng { border-color: var(--orange); } 
-        .le-red { border-color: var(--red); background: rgba(255, 59, 48, 0.1); } 
-
-        .btn-reset { width: 100%; padding: 12px; margin-top: 15px; background: var(--blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-        .btn-red { background: var(--red); }
-        .btn-dark { background: #222; border: 1px solid #e74c3c; color: #e74c3c; }
-        .summary-card { background: linear-gradient(135deg, #ffd90022, #000); border: 1px solid var(--gold); text-align: center; padding: 10px; color: white; margin-top: 5px; border-radius: 6px; }
-
-        @media (max-width: 800px) {
-            .dual-container { flex-direction: column; align-items: center; }
-            .panel { width: 100%; max-width: 450px; }
-            .logo { font-size: 1rem; } 
-            header { padding: 0 10px; height: 50px; }
-            .solver-palette { grid-template-columns: repeat(4, 1fr); }
-            .coord-header { font-size: 0.75rem; }
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateX(-5px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .shake { animation: shake 0.4s ease-in-out; border-color: var(--red) !important; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-4px);} 75% {transform: translateX(4px);} }
 
     </style>
 </head>
 <body>
 
+<div id="app-shell">
     <header>
-        <div class="logo"><span>OUROCHEST</span>MASTER</div>
-        <div class="controls">
-            <select id="langSelect" onchange="manualLangChange(this.value)">
-                <option value="es">ES</option>
-                <option value="en">EN</option>
-            </select>
+        <div class="top-bar">
+            <div class="logo">OURO<span id="logo-accent">TOOLS</span></div>
+            <div class="turn-box">
+                <span id="label-clicks" style="font-size:0.75rem">MOVES</span> 
+                <span id="val-clicks" style="color:#fff; font-weight:bold; font-size:1rem;">0</span>
+            </div>
+        </div>
+        <div class="tabs">
+            <div class="tab active" id="tab-chest" onclick="switchMode('chest')">CHEST</div>
+            <div class="tab" id="tab-quest" onclick="switchMode('quest')">QUEST</div>
         </div>
     </header>
 
-    <div id="main-container">
-        
-        <div class="dual-container">
-            <!-- PANEL PRÁCTICA -->
-            <div class="panel">
-                <h2>
-                    <span data-key="practice_title">Práctica</span> 
-                    <span id="p-score" style="color:var(--gold)">0 pts</span>
-                </h2>
-                <div style="width:100%; margin-bottom:10px; display:flex; gap:15px; font-size:0.85rem; color:#aaa; font-weight:bold;">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="hintToggle" onchange="toggleHints()" checked style="accent-color:var(--blue); transform:scale(1.2);"> 
-                        <span data-key="lbl_hints">Mostrar Pistas</span>
-                    </label>
-                </div>
-                
-                <div class="grid-container-wrapper">
-                    <div id="p-grid-container" class="master-grid"></div>
-                </div>
-                
-                <div class="log-box" id="p-log"></div>
-                <button class="btn-reset btn-red" onclick="resetPractice()" data-key="btn_restart">Reiniciar Partida</button>
-            </div>
-
-            <!-- PANEL SOLVER -->
-            <div class="panel">
-                <h2>Solver <span id="s-status" style="font-size:0.8rem; opacity:0.7">Start</span></h2>
-                <div id="s-error" class="err-msg">IMPOSSIBLE</div>
-                
-                <div class="solver-palette">
-                    <div class="p-btn active" style="background:var(--blue)" onclick="setTool('blue')">BLUE</div>
-                    <div class="p-btn" style="background:var(--green)" onclick="setTool('green')">GRN</div>
-                    <div class="p-btn" style="background:var(--turquoise)" onclick="setTool('turquoise')">TURQ</div>
-                    <div class="p-btn" style="background:var(--yellow)" onclick="setTool('yellow')">YELL</div>
-                    <div class="p-btn" style="background:var(--orange)" onclick="setTool('orange')">ORNG</div>
-                    <div class="p-btn" style="background:var(--red)" onclick="setTool('red')">RED</div>
-                    <div class="p-btn" style="background:#442222; border-color:#e74c3c; color:#ff3b30;" onclick="setTool('clear')">X</div>
-                </div>
-
-                <div class="grid-container-wrapper">
-                    <div id="s-grid-container" class="master-grid"></div>
-                </div>
-                
-                <button class="btn-reset btn-dark" onclick="resetSolver()" data-key="btn_clear">Limpiar Todo</button>
-            </div>
+    <!-- WRAPPER FOR FLEX LAYOUT ON DESKTOP -->
+    <div id="main-layout">
+        <div id="game-container">
+            <div id="grid" class="grid"></div>
+            <div id="score-display" class="score-box" style="color: var(--current-accent)">0 PTS</div>
         </div>
 
+        <div class="controls-panel">
+            <div class="status-row">
+                <span id="status-text" class="highlight">READY</span>
+                <span id="status-data">---</span>
+            </div>
+
+            <!-- Palette Chest -->
+            <div id="pal-chest" class="palette" style="grid-template-columns: repeat(6, 1fr);">
+                <button class="p-btn pb-blue active" onclick="setTool('blue')">BLUE</button>
+                <button class="p-btn pb-turq" onclick="setTool('turquoise')">TURQ</button>
+                <button class="p-btn pb-green" onclick="setTool('green')">GRN</button>
+                <button class="p-btn pb-yellow" onclick="setTool('yellow')">YELO</button>
+                <button class="p-btn pb-orange" onclick="setTool('orange')">ORNG</button>
+                <button class="p-btn pb-red" onclick="setTool('red')">RED</button>
+            </div>
+
+            <!-- Palette Quest -->
+            <div id="pal-quest" class="palette" style="display:none; grid-template-columns: repeat(7, 1fr);">
+                <button class="p-btn pb-blue active" onclick="setTool('blue')">0<span>BLUE</span></button>
+                <button class="p-btn pb-turq" onclick="setTool('turquoise')">1<span>TURQ</span></button>
+                <button class="p-btn pb-green" onclick="setTool('green')">2<span>GRN</span></button>
+                <button class="p-btn pb-yellow" onclick="setTool('yellow')">3<span>YELO</span></button>
+                <button class="p-btn pb-orange" onclick="setTool('orange')">4<span>ORNG</span></button>
+                <button class="p-btn pb-purple" onclick="setTool('purple')">PURP<span>FREE</span></button>
+                <button class="p-btn pb-red" onclick="setTool('red')">RED<span>FIN</span></button>
+            </div>
+
+            <div class="actions">
+                <button class="btn-act" onclick="undo()">UNDO</button>
+                <button class="btn-act btn-reset" onclick="reset()">RESET</button>
+            </div>
+
+            <div class="disclaimer">
+                ⚠️ EXPERIMENTAL. PROBABILITY AID ONLY. USE AT YOUR OWN RISK.
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        // ============================================
-        // 1. GENERADOR DE GRID (COMPACTO Y ROBUSTO)
-        // ============================================
-        function createGridHTML(prefix, isSolver = false) {
-            let html = '';
-            html += '<div class="coord-header"></div>';
-            for(let i=1; i<=5; i++) html += `<div class="coord-header">${i}</div>`;
-            for(let r=0; r<5; r++) {
-                html += `<div class="coord-header">${r+1}</div>`;
-                for(let c=0; c<5; c++) {
-                    let onclick = isSolver ? `solverClick(${r},${c})` : `practiceClick(${r},${c})`;
-                    let id = `${prefix}-cell-${r}-${c}`;
-                    html += `<div id="${id}" class="cell" onclick="${onclick}"></div>`;
-                }
-            }
-            return html;
-        }
+<script>
+    let currentMode = 'chest';
+    let chestState = { grid: [], clicks: 0, history: [], redFound: false, redLoc: null, tool: 'blue' };
+    let questState = { grid: [], clicks: 0, history: [], purplesFound: 0, tool: 'blue' };
 
-        document.getElementById('p-grid-container').innerHTML = createGridHTML('p');
-        document.getElementById('s-grid-container').innerHTML = createGridHTML('s', true);
+    function init() { resetData('chest'); resetData('quest'); switchMode('chest', true); }
 
-        // ============================================
-        // 2. LÓGICA DE COLORES & PUNTOS
-        // ============================================
-        function getGeoType(rRed, cRed, r, c) {
-            let dr = Math.abs(rRed - r);
-            let dc = Math.abs(cRed - c);
-            if (dr===0 && dc===0) return 'red';
-            if ((dr===0 && dc===1) || (dr===1 && dc===0)) return 'adj';
-            if (dr === dc) return 'diag'; 
-            if (dr === 0 || dc === 0) return 'line';
-            return 'far';
-        }
+    function resetData(mode) {
+        let empty = Array(5).fill().map(() => Array(5).fill(null));
+        if (mode === 'chest') chestState = { grid: empty, clicks: 0, history: [], redFound: false, redLoc: null, tool: 'blue' };
+        else questState = { grid: empty, clicks: 0, history: [], purplesFound: 0, tool: 'blue' };
+    }
 
-        function getDistanceColor(rRed, cRed, r, c) {
-            let geo = getGeoType(rRed, cRed, r, c);
-            if (geo === 'red') return 'red';
-            if (geo === 'adj') return 'orange';
-            if (geo === 'diag') return 'yellow'; 
-            if (geo === 'line') return 'green'; 
-            return 'blue';
-        }
-
-        function isValidForColor(targetColor, geoType) {
-            if (targetColor === 'red') return geoType === 'red';
-            if (targetColor === 'orange') return geoType === 'adj';
-            // Verde: Linea O Adj (si no salió naranja)
-            if (targetColor === 'green') return (geoType === 'line' || geoType === 'adj');
-            // Amarillo: Diagonal
-            if (targetColor === 'yellow') return geoType === 'diag';
-            // Turquesa: Comodín (Line, Adj, Diag)
-            if (targetColor === 'turquoise') return (geoType === 'line' || geoType === 'adj' || geoType === 'diag');
-            if (targetColor === 'blue') return geoType === 'far';
-            return false;
-        }
-
-        function getPoints(color) {
-            if (color === 'red') return 150;
-            if (color === 'orange') return 90;
-            if (color === 'yellow') return 55;
-            if (color === 'green') return 35;
-            if (color === 'turquoise') return 20;
-            return 10;
-        }
-
-        // ============================================
-        // 3. PRÁCTICA
-        // ============================================
-        let pState = { red: {r:0,c:0}, board: [], clicks:0, score:0, history:[], done:false, hints:true };
-
-        function toggleHints() { pState.hints = document.getElementById('hintToggle').checked; renderLog(); }
-
-        function resetPractice() {
-            let redR, redC;
-            do { redR = Math.floor(Math.random()*5); redC = Math.floor(Math.random()*5); } 
-            while(redR===2 && redC===2);
-            pState.red = {r: redR, c: redC};
-            
-            // Generación de tablero
-            let neighbors=[], lines=[], diagonals=[], others=[];
-            for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                if(r===redR && c===redC) continue;
-                let dr = Math.abs(redR - r), dc = Math.abs(redC - c);
-                if ((dr===0 && dc===1) || (dr===1 && dc===0)) neighbors.push({r,c});
-                else if (dr === dc) diagonals.push({r,c});
-                else if (dr === 0 || dc === 0) lines.push({r,c});
-                else others.push({r,c});
-            }
-            const shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
-            shuffle(neighbors); shuffle(lines); shuffle(diagonals); shuffle(others);
-
-            let oranges = neighbors.slice(0, 2);
-            let fullLinePool = [...lines, ...neighbors.slice(2)]; shuffle(fullLinePool);
-            let greens = fullLinePool.slice(0, 4);
-            let yellows = diagonals.slice(0, 3);
-            let validTurqPool = [...fullLinePool.slice(4), ...diagonals.slice(3)]; shuffle(validTurqPool);
-            let numTurq = Math.floor(Math.random() * 3) + 3; 
-            let turquoises = [];
-            while(turquoises.length < numTurq && validTurqPool.length > 0) turquoises.push(validTurqPool.pop());
-
-            let boardMap = Array(5).fill().map(() => Array(5).fill('blue'));
-            boardMap[redR][redC] = 'red';
-            oranges.forEach(p => boardMap[p.r][p.c] = 'orange');
-            greens.forEach(p => boardMap[p.r][p.c] = 'green');
-            yellows.forEach(p => boardMap[p.r][p.c] = 'yellow');
-            turquoises.forEach(p => boardMap[p.r][p.c] = 'turquoise');
-
-            pState.board = boardMap;
-            pState.clicks = 0; pState.score = 0; pState.history = []; pState.done = false;
-            pState.hints = document.getElementById('hintToggle').checked;
-            renderPracticeState(); renderLog();
-        }
-
-        function practiceClick(r, c) {
-            if(pState.done || pState.clicks>=5) return;
-            if(pState.history.find(h=>h.r===r && h.c===c)) return;
-            pState.clicks++;
-            let color = pState.board[r][c];
-            let pts = getPoints(color);
-            pState.score += pts;
-            pState.history.push({r,c,color,pts});
-            if(pState.clicks>=5) pState.done = true;
-            renderPracticeState(); addLogEntry(color, {r,c}, pts);
-            if(pState.done) addLogSummary();
-        }
-
-        function renderPracticeState() {
-            const sc = document.getElementById('p-score'); if(sc) sc.innerText = pState.score + ' pts';
-            for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                let cell = document.getElementById(`p-cell-${r}-${c}`);
-                if(cell) { 
-                    cell.className = 'cell'; cell.style.opacity = '1'; cell.style.cursor = 'pointer'; 
-                    cell.classList.remove('blue', 'green', 'turquoise', 'yellow', 'orange', 'red', 'revealed');
-                }
-            }
-            pState.history.forEach(h => {
-                let cell = document.getElementById(`p-cell-${h.r}-${h.c}`);
-                if(cell) { 
-                    let cssClass = h.color;
-                    cell.classList.add('revealed', cssClass); 
-                    cell.style.cursor = 'default'; 
-                }
-            });
-            if(pState.done) {
-                for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                    let cell = document.getElementById(`p-cell-${r}-${c}`);
-                    if (!pState.history.some(h => h.r === r && h.c === c)) {
-                        let trueColor = pState.board[r][c];
-                        cell.classList.add(trueColor, 'revealed'); 
-                        cell.style.opacity = '0.3'; 
-                        cell.style.cursor = 'default';
-                    }
-                }
-            }
-        }
-
-        // ============================================
-        // 4. SOLVER IA MEJORADO (GREEDY + COUNTING)
-        // ============================================
-        let sState = { tool: 'blue', inputs: Array(5).fill().map(()=>Array(5).fill(null)) };
-        function setTool(t) { sState.tool = t; document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll(`.p-btn[onclick*="'${t}'"]`).forEach(b => b.classList.add('active')); }
-        function resetSolver() { sState.inputs = Array(5).fill().map(()=>Array(5).fill(null)); renderSolver(); }
+    function switchMode(mode, force = false) {
+        if (!force && currentMode === mode) return;
+        currentMode = mode;
         
-        function solverClick(r, c) {
-            let next = sState.inputs.map(row => [...row]);
-            let val = (sState.tool==='clear') ? null : sState.tool;
-            next[r][c] = val;
-            
-            if (val === 'red') {
-                sState.inputs = next;
-                renderSolver();
-                return;
-            }
+        const root = document.documentElement;
+        if (mode === 'chest') root.style.setProperty('--current-accent', 'var(--red)');
+        else root.style.setProperty('--current-accent', 'var(--purple)');
 
-            if(val !== null && calcPoss(next) === 0) {
-                showError("IMPOSSIBLE");
-                let cell = document.getElementById(`s-cell-${r}-${c}`);
-                if(cell){ cell.classList.add('shake'); setTimeout(()=>cell.classList.remove('shake'),400);}
-                return;
-            }
-            sState.inputs = next; 
-            renderSolver();
+        document.getElementById('tab-chest').className = mode === 'chest' ? 'tab active' : 'tab';
+        document.getElementById('tab-quest').className = mode === 'quest' ? 'tab active' : 'tab';
+        document.getElementById('pal-chest').style.display = mode === 'chest' ? 'grid' : 'none';
+        document.getElementById('pal-quest').style.display = mode === 'quest' ? 'grid' : 'none';
+        
+        setTool(mode === 'chest' ? chestState.tool : questState.tool);
+        render();
+    }
+
+    function setTool(t) {
+        let s = currentMode === 'chest' ? chestState : questState;
+        s.tool = t;
+        let palId = currentMode === 'chest' ? 'pal-chest' : 'pal-quest';
+        document.querySelectorAll(`#${palId} .p-btn`).forEach(b => b.classList.remove('active'));
+        let cls = '';
+        if(t.includes('blue')) cls='.pb-blue'; else if(t.includes('green')) cls='.pb-green';
+        else if(t.includes('turquoise')) cls='.pb-turq'; else if(t.includes('yellow')) cls='.pb-yellow';
+        else if(t.includes('orange')) cls='.pb-orange'; else if(t.includes('red')) cls='.pb-red';
+        else if(t.includes('purple')) cls='.pb-purple';
+        let btn = document.querySelector(`#${palId} ${cls}`);
+        if(btn) btn.classList.add('active');
+    }
+
+    function handleClick(r, c) {
+        let s = currentMode === 'chest' ? chestState : questState;
+        if (currentMode === 'chest' && s.clicks >= 5) return;
+        let isFree = (currentMode === 'quest' && (s.tool === 'purple' || s.tool === 'red'));
+        if (currentMode === 'quest' && s.clicks >= 7 && !isFree) return;
+
+        s.history.push({
+            r, c, gridSnap: s.grid.map(row => [...row]), clicksSnap: s.clicks,
+            stateSnap: currentMode === 'chest' ? {rf:s.redFound, rl:s.redLoc} : {pf:s.purplesFound}
+        });
+
+        s.grid[r][c] = s.tool;
+
+        if (currentMode === 'chest') {
+            s.clicks++;
+            if (s.tool === 'red') { s.redFound = true; s.redLoc = {r,c}; }
+        } else {
+            if (s.tool === 'purple' || s.tool === 'red') s.purplesFound++;
+            else s.clicks++;
         }
+        render();
+    }
 
-        function calcPoss(inputs) {
-            let count = 0;
-            for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
+    // --- CHEST LOGIC (V49 STABLE) ---
+    function solveChest() {
+        let s = chestState;
+        if (s.clicks === 0 && !s.grid[2][2]) return {r:2,c:2, msg:"START CENTER"};
+        let cands = [];
+        if(s.redFound) cands.push(s.redLoc);
+        else {
+            for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
                 if(r===2 && c===2) continue;
-                let ok = true;
-                for(let ir=0; ir<5; ir++) for(let ic=0; ic<5; ic++) {
-                    let input = inputs[ir][ic];
-                    if(input && input !== 'red') { 
-                        let geo = getGeoType(r,c,ir,ic);
-                        if (!isValidForColor(input, geo)) { ok = false; break; }
-                    }
+                let possible = true;
+                for(let h of s.history) {
+                    let val = s.grid[h.r][h.c];
+                    let dr=Math.abs(r-h.r), dc=Math.abs(c-h.c);
+                    let ok = false;
+                    if(val==='red') ok=(dr===0&&dc===0);
+                    else if(val==='orange') ok=(dr+dc===1);
+                    else if(val==='yellow') ok=(dr===dc && dr>0);
+                    else if(val==='green') ok=((dr===0||dc===0) && dr+dc>0);
+                    else if(val==='turquoise') ok=((dr===0||dc===0||dr===dc) && dr+dc>0);
+                    else if(val==='blue') ok=!(dr===0&&dc===0) && !(dr+dc===1) && !(dr===dc) && !(dr===0||dc===0);
+                    if(!ok){ possible=false; break; }
                 }
-                if(ok) count++;
+                if(possible) cands.push({r,c});
             }
-            return count;
+        }
+        let active = cands.length > 0 ? cands : [];
+        if (s.redFound) return { ...getHarvest(s.redLoc, s.grid), msg:"HARVEST", count:1 };
+        if (active.length === 1) return { r:active[0].r, c:active[0].c, msg:"GUARANTEED", count:1 };
+        if(active.length > 0 && active.length <= 7) {
+            let best = active[Math.floor(Math.random()*active.length)];
+            return { r:best.r, c:best.c, msg:"BEST GUESS", count:cands.length };
+        }
+        if(active.length > 0) return { r:active[0].r, c:active[0].c, msg:"TRIANGULATE", count:cands.length };
+        return { r:-1, c:-1, msg:"LOGIC ERROR" };
+    }
+    function getHarvest(red, grid) {
+        let best = null, max = -1;
+        for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
+            if(grid[r][c]) continue;
+            let dr=Math.abs(red.r-r), dc=Math.abs(red.c-c);
+            let pts=0;
+            if(dr+dc===1) pts=90; else if(dr===dc) pts=55; else if(dr===0||dc===0) pts=35; else pts=10;
+            if(pts>max){max=pts; best={r,c};}
+        }
+        return best || {r:-1,c:-1};
+    }
+
+    // --- QUEST LOGIC (V49 ORACLE) ---
+    function solveQuest() {
+        let s = questState;
+        let unknown=[], purples=[], constraints=[];
+        
+        for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
+            let v = s.grid[r][c];
+            if(!v) unknown.push({r,c});
+            else if(v==='purple'||v==='red') purples.push({r,c});
+            else constraints.push({r,c, num: getNum(v)});
         }
 
-        function renderSolver() {
-            let possibleRedLocs = [];
-            let manualRed = null;
-            let counts = { orange:0, yellow:0, green:0 };
-            
-            // 1. Contar fichas ya encontradas
-            for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                let val = sState.inputs[r][c];
-                if(val==='red') manualRed = {r,c};
-                if(val==='orange') counts.orange++;
-                if(val==='yellow') counts.yellow++;
-                if(val==='green') counts.green++;
-            }
-            
-            // 2. Determinar candidatos
-            if(manualRed) {
-                possibleRedLocs.push(manualRed);
-            } else {
-                for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                    if(r===2 && c===2) continue;
-                    let ok = true;
-                    for(let ir=0; ir<5; ir++) for(let ic=0; ic<5; ic++) {
-                        let input = sState.inputs[ir][ic];
-                        if(input && input!=='red') {
-                            let geo = getGeoType(r,c,ir,ic);
-                            if (!isValidForColor(input, geo)) { ok = false; break; }
+        let missing = 4 - purples.length;
+        if(missing <= 0) return { r:-1,c:-1, msg:"COMPLETED!", evs:[] };
+
+        let validConfigs = 0;
+        let totalEV = Array(5).fill().map(()=>Array(5).fill(0));
+        let maxSols = 15000;
+
+        unknown.sort((a,b) => countConstraintNeighbors(b) - countConstraintNeighbors(a));
+        function countConstraintNeighbors(cell) {
+            return getNeighbors(cell.r, cell.c).filter(n => constraints.some(k => k.r===n.r && k.c===n.c)).length;
+        }
+
+        let board = Array(5).fill().map(()=>Array(5).fill(0));
+        purples.forEach(p => board[p.r][p.c] = 1);
+
+        let relevantConstraints = constraints.filter(k => getNeighbors(k.r,k.c).some(n => board[n.r][n.c] === 0));
+
+        function solve(idx, minesLeft) {
+            if(validConfigs >= maxSols) return;
+            if(minesLeft === 0) {
+                if(checkAll(relevantConstraints, board)) {
+                    validConfigs++;
+                    for(let u of unknown) {
+                        let pts = 0;
+                        let r=u.r, c=u.c;
+                        if(board[r][c] === 1) {
+                            if (purples.length === 2) pts = 1000; 
+                            else pts = 50; 
+                        } else {
+                            let mineNeighbors = 0;
+                            let nb = getNeighbors(r,c);
+                            for(let n of nb) if(board[n.r][n.c]===1) mineNeighbors++;
+                            if(mineNeighbors === 4) pts = 90;
+                            else if(mineNeighbors === 3) pts = 55;
+                            else if(mineNeighbors === 2) pts = 35;
+                            else if(mineNeighbors === 1) pts = 20;
+                            else pts = 10;
                         }
+                        totalEV[r][c] += pts;
                     }
-                    if(ok) possibleRedLocs.push({r,c});
+                }
+                return;
+            }
+            if(idx >= unknown.length) return;
+            if(!checkPartial(relevantConstraints, board)) return;
+
+            let u = unknown[idx];
+            board[u.r][u.c] = 1;
+            solve(idx+1, minesLeft-1);
+            board[u.r][u.c] = -1;
+            solve(idx+1, minesLeft);
+            board[u.r][u.c] = 0;
+        }
+
+        function checkAll(cons, b) {
+            for(let k of cons) {
+                let m=0, nb=getNeighbors(k.r, k.c);
+                for(let n of nb) if(b[n.r][n.c]===1) m++;
+                if(m !== k.num) return false;
+            }
+            return true;
+        }
+        function checkPartial(cons, b) {
+            for(let k of cons) {
+                let m=0, u=0, nb=getNeighbors(k.r, k.c);
+                for(let n of nb) {
+                    if(b[n.r][n.c]===1) m++; else if(b[n.r][n.c]===0) u++;
+                }
+                if(m > k.num) return false;
+                if(m + u < k.num) return false;
+            }
+            return true;
+        }
+
+        if(s.clicks === 0 && unknown.length > 20) return { r:2, c:2, msg:"START CENTER", type:'sugg-safe' };
+
+        solve(0, missing);
+
+        if(validConfigs === 0) return { r:-1,c:-1, msg:"CONTRADICTION", type:'sugg-risk' };
+
+        let bestEV = -1;
+        let bestMove = null;
+
+        for(let u of unknown) {
+            let ev = totalEV[u.r][u.c] / validConfigs;
+            if(ev > bestEV) { bestEV = ev; bestMove = u; }
+        }
+
+        if(bestMove) {
+            let type = 'sugg-high-value';
+            let msg = `VALUE: ${Math.round(bestEV)}`;
+            
+            if (purples.length === 3) {
+                type = 'sugg-finisher';
+                msg = "FOUND RED!";
+            } else if (bestEV > 80) { 
+                type = 'sugg-high-value'; 
+            } else if (bestEV < 25) { 
+                type = 'sugg-safe'; 
+            }
+            return { r:bestMove.r, c:bestMove.c, msg:msg, type:type };
+        }
+
+        return { r:-1,c:-1, msg:"?", type:'' };
+    }
+
+    function getNum(val) {
+        if(val==='blue') return 0; if(val==='turquoise') return 1; if(val==='green') return 2;
+        if(val==='yellow') return 3; if(val==='orange') return 4; return 0;
+    }
+    function getNeighbors(r, c) {
+        let n = [];
+        for(let rr=r-1; rr<=r+1; rr++) for(let cc=c-1; cc<=c+1; cc++) {
+            if(rr>=0 && rr<5 && cc>=0 && cc<5 && !(rr===r && cc===c)) n.push({r:rr, c:cc});
+        }
+        return n;
+    }
+    function calculateScore(mode) {
+        let score = 0;
+        let s = mode==='chest' ? chestState : questState;
+        for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
+            let v = s.grid[r][c];
+            if(v==='blue') score+=10; else if(v==='turquoise') score+=20; else if(v==='green') score+=35;
+            else if(v==='yellow') score+=55; else if(v==='orange') score+=90; else if(v==='purple') score+=5;
+            else if(v==='red') score+=150;
+        }
+        return score;
+    }
+
+    // --- RENDER ---
+    function render() {
+        let s = currentMode === 'chest' ? chestState : questState;
+        let res = currentMode === 'chest' ? solveChest() : solveQuest();
+        let sugg = res || {r:-1,c:-1};
+
+        let gridEl = document.getElementById('grid');
+        gridEl.className = res.msg && res.msg.includes("CONTRA") ? 'grid error-state' : 'grid';
+        gridEl.innerHTML = '';
+
+        for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
+            let d = document.createElement('div');
+            d.className = 'cell';
+            let val = s.grid[r][c];
+
+            if (val) {
+                d.classList.add(val);
+                d.classList.add('filled');
+                if (currentMode === 'chest') {
+                    if(val==='red') d.innerText='★'; 
+                    else if(val==='turquoise') d.innerText='T'; 
+                    else d.innerText=val[0].toUpperCase();
+                } else {
+                    if(val==='purple') d.innerText='●'; 
+                    else if(val==='red') d.innerText='★'; 
+                    else d.innerText = getNum(val);
+                }
+            } else {
+                if (sugg.r === r && sugg.c === c) {
+                    d.classList.add('suggestion');
+                    if(sugg.type === 'sugg-mine') d.classList.add('sugg-mine');
+                    else if(sugg.type === 'sugg-high-value') d.classList.add('sugg-high-value');
+                    else if(sugg.type === 'sugg-finisher') d.classList.add('sugg-finisher');
+                    else if(sugg.type === 'sugg-safe') d.classList.add('sugg-safe');
+                    else d.classList.add('sugg-chest');
                 }
             }
-
-            document.getElementById('s-status').innerText = `${possibleRedLocs.length} Possible`;
-
-            // 3. IA DE SUGERENCIA (GREEDY + COUNT AWARE)
-            let suggestion = null;
-            let maxEV = -1;
-
-            if (possibleRedLocs.length > 0 && possibleRedLocs.length < 24) {
-                 for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                     if (!sState.inputs[r][c]) {
-                         let totalScore = 0;
-                         possibleRedLocs.forEach(loc => {
-                             let geo = getGeoType(loc.r, loc.c, r, c);
-                             let score = 10; // Base blue
-                             
-                             if (geo === 'red') score = 150;
-                             else if (geo === 'adj') score = (counts.orange < 2) ? 90 : 35; // Si naranjas agotadas (2), es verde/turq
-                             else if (geo === 'diag') score = (counts.yellow < 3) ? 55 : 20; // Si amarillas agotadas (3), es turq
-                             else if (geo === 'line') score = (counts.green < 4) ? 35 : 20; // Si verdes agotadas (4), es turq
-                             
-                             totalScore += score;
-                         });
-                         
-                         let ev = totalScore / possibleRedLocs.length;
-                         
-                         // Boost pequeño si aún buscamos a la roja para romper empates azules
-                         if (possibleRedLocs.length > 1 && !manualRed) {
-                             let blueCount = 0;
-                             possibleRedLocs.forEach(loc => {
-                                 if(getGeoType(loc.r, loc.c, r, c) === 'far') blueCount++;
-                             });
-                             let splitScore = (1 - Math.abs(0.5 - (blueCount/possibleRedLocs.length))) * 25;
-                             ev += splitScore;
-                         }
-
-                         if(ev > maxEV) { maxEV = ev; suggestion = {r,c}; }
-                     }
-                 }
-            } else if (possibleRedLocs.length === 24 && !sState.inputs[2][2]) {
-                suggestion = {r:2, c:2};
-            }
-
-            // 4. Render Grid
-            for(let r=0; r<5; r++) for(let c=0; c<5; c++) {
-                let cell = document.getElementById(`s-cell-${r}-${c}`);
-                if(cell) { 
-                    cell.className = 'cell'; 
-                    cell.classList.remove('suggestion', 'red-candidate');
-                    let input = sState.inputs[r][c]; 
-                    if(input) cell.classList.add('input-'+input); 
-                    else if(!manualRed) {
-                        let isPossible = possibleRedLocs.some(loc => loc.r===r && loc.c===c);
-                        if(isPossible) cell.classList.add('red-candidate'); // Borde sutil rojo
-                        else cell.classList.add('eliminated'); 
-                    }
-                    if(suggestion && r===suggestion.r && c===suggestion.c) cell.classList.add('suggestion');
-                }
-            }
+            d.onclick = () => handleClick(r, c);
+            gridEl.appendChild(d);
         }
 
-        // ============================================
-        // UTILS
-        // ============================================
-        function showError(msg) { 
-            let el=document.getElementById('s-error'); 
-            if(el){ el.innerText=msg; el.style.opacity=1; setTimeout(()=>el.style.opacity=0,1000); }
-        }
-        function manualLangChange(val) { setLanguage(val); }
+        document.getElementById('val-clicks').innerText = s.clicks + (currentMode==='chest'?'/5':'/7');
+        let txt = document.getElementById('status-text');
+        let data = document.getElementById('status-data');
         
-        const translations = {
-            es: { practice_title: "Práctica", lbl_hints: "Pistas", btn_restart: "Reiniciar Partida", btn_clear: "Limpiar Todo", colors: { blue: "AZUL", green: "VERDE", turquoise: "TURQ.", yellow: "AMARILLA", orange: "NARANJA", red: "ROJA" }, hints: { blue: "Lejos (Seguro)", green: "Fila/Columna", turquoise: "Línea/Diagonal", yellow: "Cualquier Diagonal", orange: "Lado (Arriba/Abajo/Esq/Der)", red: "¡ENCONTRADA!" }, msgs: { start: "Click centro (3,3).", summary: "RESUMEN" } },
-            en: { practice_title: "Practice", lbl_hints: "Hints", btn_restart: "Restart Game", btn_clear: "Clear All", colors: { blue: "BLUE", green: "GREEN", turquoise: "TURQ.", yellow: "YELLOW", orange: "ORANGE", red: "RED" }, hints: { blue: "Far (Safe)", green: "Row/Col", turquoise: "Line/Diag", yellow: "Any Diagonal", orange: "Side (Up/Down/L/R)", red: "FOUND!" }, msgs: { start: "Click center (3,3).", summary: "SCORE" } }
-        };
-        let curLang = 'es';
-        
-        function setLanguage(lang) { 
-            curLang = lang; document.getElementById('langSelect').value = lang; 
-            const t = translations[curLang]; 
-            document.querySelectorAll('[data-key]').forEach(el => { 
-                const key = el.getAttribute('data-key'); 
-                if(t[key]) el.innerText = t[key]; 
-            }); 
-            renderLog(); 
-        }
-        
-        function renderLog() { 
-            const el = document.getElementById('p-log'); if(el){ el.innerHTML = ''; 
-            addLogHTML(el, 'start', null, 0); 
-            pState.history.forEach(h => addLogHTML(el, h.color, h, h.pts)); 
-            if(pState.done) addLogHTML(el, 'summary', null, pState.score); }
-        }
-        function addLogEntry(type, coords, pts) { addLogHTML(document.getElementById('p-log'), type, coords, pts); }
-        function addLogSummary() { addLogHTML(document.getElementById('p-log'), 'summary', null, pState.score); }
-        function addLogHTML(el, type, coords, pts) { 
-            const t = translations[curLang]; 
-            if (type === 'summary') { el.insertAdjacentHTML('beforeend', `<div class="summary-card"><div style="font-size:0.9rem; opacity:0.8">${t.msgs.summary}</div><div style="font-size:1.5rem; font-weight:bold; color:var(--gold)">${pts}</div></div>`); el.scrollTop = el.scrollHeight; return; } 
-            let title = (type==='start') ? "" : t.colors[type]; 
-            let desc = ""; if(type==='start') desc = t.msgs.start; else if(pState.hints) desc = t.hints[type] || ""; 
-            let css = ''; if(type==='blue') css='le-blue'; else if(type==='green') css='le-green'; else if(type==='turquoise') css='le-turq'; else if(type==='yellow') css='le-yell'; else if(type==='orange') css='le-orng'; else if(type==='red') css='le-red'; 
-            let html = `<div class="log-entry ${css}"><div class="log-num">${coords ? pState.history.findIndex(h=>h===coords)+1 : '#'}</div><div class="log-desc">${title ? `<strong>${title}</strong>` : ''} ${coords ? `(${coords.r+1},${coords.c+1})` : ''}${desc ? `<span class="hint-text">${desc}</span>` : ''}</div>${pts>0 ? `<div class="log-pts">+${pts}</div>` : ''}</div>`; 
-            el.insertAdjacentHTML('beforeend', html); el.scrollTop = el.scrollHeight; 
+        txt.innerText = sugg.msg || "PLAY";
+        if(res.msg && res.msg.includes("CONTRA")) txt.style.color = "var(--red)";
+        else txt.style.color = "#fff";
+
+        if(currentMode === 'chest') {
+            data.innerText = s.redFound ? "RED FOUND" : (sugg.count ? sugg.count + " OPT" : "---");
+        } else {
+            data.innerText = s.purplesFound + " / 4 FOUND";
         }
 
-        // Init
-        const userLang = navigator.language || navigator.userLanguage;
-        setLanguage(userLang.startsWith('es') ? 'es' : 'en');
-        resetPractice();
-        resetSolver();
-    </script>
+        let sb = document.getElementById('score-display');
+        let showScore = false;
+        if(currentMode === 'chest' && s.clicks >= 5) showScore = true;
+        if(currentMode === 'quest' && (s.clicks >= 7 || s.purplesFound === 4)) showScore = true;
+
+        if(showScore) {
+            sb.classList.add('visible');
+            sb.innerText = calculateScore(currentMode) + " PTS";
+        } else {
+            sb.classList.remove('visible');
+        }
+    }
+
+    window.undo = function() {
+        let s = currentMode === 'chest' ? chestState : questState;
+        if(!s.history.length) return;
+        let l = s.history.pop();
+        s.grid = l.gridSnap;
+        s.clicks = l.clicksSnap;
+        if(currentMode==='chest') { s.redFound=l.stateSnap.rf; s.redLoc=l.stateSnap.rl; }
+        else { s.purplesFound=l.stateSnap.pf; }
+        render();
+    };
+
+    window.reset = function() {
+        resetData(currentMode);
+        setTool(currentMode==='chest'?'blue':'blue');
+        render();
+    };
+
+    init();
+</script>
 </body>
 </html>
